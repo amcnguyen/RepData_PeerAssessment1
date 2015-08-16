@@ -1,3 +1,6 @@
+
+## Reproducible Research
+
 ### Section 1: Introduction
 
 It is now possible to collect a large amount of data about personal
