@@ -1,5 +1,5 @@
 
-## Reproducible Research
+## Reproducible Research - Project 1
 
 ### Section 1: Introduction
 
