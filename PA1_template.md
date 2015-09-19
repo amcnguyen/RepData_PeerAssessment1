@@ -1,10 +1,9 @@
 # Reproducible Research: Peer Assessment 1
 
 
-### 1/ Loading and preprocessing the data
+### Step 1 - Loading and preprocessing the data
 
-
-Download and unzipped data file ...
+Load needed R packages ...
 
 ```r
 getwd()
@@ -17,28 +16,12 @@ getwd()
 ```r
 library(data.table) 
 library(dplyr)
+library(ggplot2)
 ```
 
-```
-## 
-## Attaching package: 'dplyr'
-## 
-## The following objects are masked from 'package:data.table':
-## 
-##     between, last
-## 
-## The following objects are masked from 'package:stats':
-## 
-##     filter, lag
-## 
-## The following objects are masked from 'package:base':
-## 
-##     intersect, setdiff, setequal, union
-```
+Download and unzip the input data file ...
 
 ```r
-library(ggplot2)
-
 if(!file.exists("activity.zip")) {
     temp <- tempfile()
     download.file("http://d396qusza40orc.cloudfront.net/repdata%2Fdata%2Factivity.zip",temp)
@@ -47,10 +30,11 @@ if(!file.exists("activity.zip")) {
 }
 ```
 
-Load the .csv data file ... 
+Read the unzipped .csv input data file ... 
 
 ```r
 df <- read.csv("activity.csv")
+
 str(df) 
 ```
 
@@ -63,12 +47,13 @@ str(df)
 
 
 
-### 2/ What is mean total number of steps taken per day?
+### Step 2 - What is mean total number of steps taken per day?
 
-Aggregate the number of steps by day ...
+Using **Aggregate** fucntion to calculate the total number of steps by day ...
 
 ```r
 steps_by_day <- aggregate(steps ~ date, df, sum)
+
 head(steps_by_day)
 ```
 
@@ -82,14 +67,14 @@ head(steps_by_day)
 ## 6 2012-10-07 11015
 ```
 
-Create a **histogram=** showing the total number of steps taken each day ...
+Create a **histogram** showing the total number of steps taken each day ...
 
 ```r
 hist(steps_by_day$steps, 
      main   = "Histogram - Number of Steps taken each Day", 
      xlab   = "Number of steps taken each day", 
      ylab   = "Frequency",
-     breaks = 40,
+     breaks = 20,
      col    = "green")
 ```
 
@@ -99,6 +84,7 @@ Calculate the **mean** of the total number of steps taken each day ...
 
 ```r
 mean1 <- mean(steps_by_day$steps)
+
 mean1
 ```
 
@@ -110,6 +96,7 @@ Calculate the **median** of the total number of steps taken each day ...
 
 ```r
 median1 <- median(steps_by_day$steps)
+
 median1
 ```
 
@@ -119,12 +106,13 @@ median1
 
 
 
-### 3/ What is the average daily activity pattern?
+### Step 3 - What is the average daily activity pattern?
 
 Calculate the **average** number of steps taken across all days by interval ...
 
 ```r
 avg_steps_by_interval <- aggregate(steps ~ interval, df, mean)
+
 head(avg_steps_by_interval,5)   ## str(avg_steps_by_interval)
 ```
 
@@ -141,6 +129,7 @@ Let's find the **index** of the 5-minutes interval, on average across all days i
 
 ```r
 index_max <- which.max(avg_steps_by_interval$steps)
+
 index_max
 ```
 
@@ -148,10 +137,11 @@ index_max
 ## [1] 104
 ```
 
-Then, get the row that contains the max values first so we can plot on the chart too ...
+Then, get the **row** that contains the max values first so we can plot on the chart too ...
 
 ```r
 row_max <- avg_steps_by_interval[index_max,]
+
 row_max
 ```
 
@@ -182,16 +172,16 @@ Now, create a time series plot `type = "l"` of 5-minutes interval (x-axis) and t
                      vjust=-0.5), 
                      colour="blue", 
                      size=4) +  
-       ggtitle("Average number of steps by 5-minutes interval") +
-       labs(x = "5-minutes interval") + 
-       labs(y = "Average number of steps")
+       ggtitle("Average number of steps by 5-minutes interval \n") +
+       labs(x = "\n 5-minutes interval") + 
+       labs(y = "Average number of steps \n")
 ```
 
 ![](PA1_template_files/figure-html/Plot2-1.png) 
 
 
 
-### 4/ Imputing missing values
+### Step 4 - Imputing missing values
 
 The total number of missing values in the dataset is ....
 
@@ -228,6 +218,7 @@ Then, aggregate the number of steps by day for the new dataset ...
 
 ```r
 steps_by_day2 <- aggregate(steps ~ date, df2, sum)
+
 head(steps_by_day2)
 ```
 
@@ -246,9 +237,9 @@ There is no missing values in the new dataset. So, let's create the **histogram*
 ```r
 hist(steps_by_day2$steps, 
      main   = "Histogram - Number of Steps taken each Day", 
-     xlab   = "Number of steps taken each day \n( without missing values )", 
+     xlab   = "\n Number of steps taken each day \n( without missing values )", 
      ylab   = "Frequency",
-     breaks = 40,
+     breaks = 20,
      col    = "green")
 ```
 
@@ -258,6 +249,7 @@ Recalculate the **mean** of the total number of steps taken each day ...
 
 ```r
 mean2 <- mean(steps_by_day2$steps)
+
 mean2
 ```
 
@@ -269,6 +261,7 @@ Recalculate the **median** of the total number of steps taken each day ...
 
 ```r
 median2 <- median(steps_by_day2$steps)
+
 median2
 ```
 
@@ -280,7 +273,7 @@ median2
 
 
 
-### 5/ Are there differences in activity patterns between weekdays and weekends?
+### Step 5 - Are there differences in activity patterns between weekdays and weekends?
 
 Create factor variables **"weekday"** and **"weekday"** in the filled-in missing values dataset  ...
 
@@ -310,9 +303,9 @@ avg_steps_by_interval_day_type <- aggregate(steps ~ interval + day_type, df3, me
 ggplot(avg_steps_by_interval_day_type, aes(x = interval, y = steps)) + 
       geom_line( col = "blue" ) + 
       facet_wrap(~ day_type, ncol = 1) +
-      ggtitle("Average number of steps each day by interval \n( Weekday vs. Weekend )") +
-      labs(x = "5-minutes interval") + 
-      labs(y = "Average number of steps taken")
+      ggtitle("Average number of steps each day by interval \n( Weekday vs. Weekend ) \n") +
+      labs(x = "\n 5-minutes interval") + 
+      labs(y = "Average number of steps taken \n")
 ```
 
 ![](PA1_template_files/figure-html/Plot4-1.png) 

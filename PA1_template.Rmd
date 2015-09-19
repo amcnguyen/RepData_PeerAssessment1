@@ -6,16 +6,19 @@ output:
 ---
 
 
-### 1/ Loading and preprocessing the data
+### Step 1 - Loading and preprocessing the data
 
-
-Download and unzipped data file ...
-```{r, echo=TRUE}
+Load needed R packages ...
+```{r library, echo=TRUE, message=FALSE}
 getwd()
 
 library(data.table) 
 library(dplyr)
 library(ggplot2)
+```
+
+Download and unzip the input data file ...
+```{r download, echo=TRUE}
 
 if(!file.exists("activity.zip")) {
     temp <- tempfile()
@@ -25,68 +28,84 @@ if(!file.exists("activity.zip")) {
 }
 ```
 
-Load the .csv data file ... 
-```{r, echo=TRUE}
+Read the unzipped .csv input data file ... 
+```{r load_data, echo=TRUE}
+
 df <- read.csv("activity.csv")
+
 str(df) 
 ```
 
 
 
-### 2/ What is mean total number of steps taken per day?
+### Step 2 - What is mean total number of steps taken per day?
 
-Aggregate the number of steps by day ...
-```{r, echo=TRUE}
+Using **Aggregate** fucntion to calculate the total number of steps by day ...
+```{r aggregation1, echo=TRUE}
+
 steps_by_day <- aggregate(steps ~ date, df, sum)
+
 head(steps_by_day)
 ```
 
-Create a **histogram=** showing the total number of steps taken each day ...
+Create a **histogram** showing the total number of steps taken each day ...
 ```{r Plot1, echo=TRUE}
+
 hist(steps_by_day$steps, 
      main   = "Histogram - Number of Steps taken each Day", 
      xlab   = "Number of steps taken each day", 
      ylab   = "Frequency",
-     breaks = 40,
+     breaks = 20,
      col    = "green")
 ```
 
 Calculate the **mean** of the total number of steps taken each day ...
-```{r, echo=TRUE}
+```{r mean1, echo=TRUE}
+
 mean1 <- mean(steps_by_day$steps)
+
 mean1
 ```
 
 Calculate the **median** of the total number of steps taken each day ...
-```{r, echo=TRUE}
+```{r median1, echo=TRUE}
+
 median1 <- median(steps_by_day$steps)
+
 median1
 ```
 
 
 
-### 3/ What is the average daily activity pattern?
+### Step 3 - What is the average daily activity pattern?
 
 Calculate the **average** number of steps taken across all days by interval ...
-```{r, echo=TRUE}
+```{r average, echo=TRUE}
+
 avg_steps_by_interval <- aggregate(steps ~ interval, df, mean)
+
 head(avg_steps_by_interval,5)   ## str(avg_steps_by_interval)
 ```
 
 Let's find the **index** of the 5-minutes interval, on average across all days in the dataset, that contains the maximum number of steps ...
-```{r, echo=TRUE}
+```{r index_max, echo=TRUE}
+
 index_max <- which.max(avg_steps_by_interval$steps)
+
 index_max
 ```
 
-Then, get the row that contains the max values first so we can plot on the chart too ...
-```{r, echo=TRUE}
+Then, get the **row** that contains the max values first so we can plot on the chart too ...
+```{r row_max, echo=TRUE}
+
 row_max <- avg_steps_by_interval[index_max,]
+
 row_max
 ```
 
 Now, create a time series plot `type = "l"` of 5-minutes interval (x-axis) and the **average** number of steps taken across all days (y-axis) ...
 ```{r Plot2, echo=TRUE}
+
   ggplot(avg_steps_by_interval, aes(x = interval, y = steps)) + 
        geom_line() + 
        geom_point() +
@@ -106,22 +125,24 @@ Now, create a time series plot `type = "l"` of 5-minutes interval (x-axis) and t
                      vjust=-0.5), 
                      colour="blue", 
                      size=4) +  
-       ggtitle("Average number of steps by 5-minutes interval") +
-       labs(x = "5-minutes interval") + 
-       labs(y = "Average number of steps")
+       ggtitle("Average number of steps by 5-minutes interval \n") +
+       labs(x = "\n 5-minutes interval") + 
+       labs(y = "Average number of steps \n")
 ```
 
 
 
-### 4/ Imputing missing values
+### Step 4 - Imputing missing values
 
 The total number of missing values in the dataset is ....
-```{r, echo=TRUE}
+```{r total_missing1, echo=TRUE}
+
 sum(!complete.cases(df))
 ```
 
 Use the average number of steps per 5-minutes interval ( calculated in previous question ), to replace the **N/A** values in the dataset ... 
 ```{r, echo=TRUE}
+
 library(magrittr)
 
 df2 <- inner_join(df, avg_steps_by_interval, by="interval") %>% 
@@ -131,35 +152,43 @@ df2 <- inner_join(df, avg_steps_by_interval, by="interval") %>%
 
 
 Let's verify the new dataset ...
-```{r, echo=TRUE}
+```{r total_missing2, echo=TRUE}
+
 sum(!complete.cases(df2))
 ```
 
 Then, aggregate the number of steps by day for the new dataset ...
-```{r, echo=TRUE}
+```{r aggregation2, echo=TRUE}
+
 steps_by_day2 <- aggregate(steps ~ date, df2, sum)
+
 head(steps_by_day2)
 ```
   
 There is no missing values in the new dataset. So, let's create the **histogram** again ...
 ```{r Plot3, echo=TRUE}
+
 hist(steps_by_day2$steps, 
      main   = "Histogram - Number of Steps taken each Day", 
-     xlab   = "Number of steps taken each day \n( without missing values )", 
+     xlab   = "\n Number of steps taken each day \n( without missing values )", 
      ylab   = "Frequency",
-     breaks = 40,
+     breaks = 20,
      col    = "green")
 ```
 
 Recalculate the **mean** of the total number of steps taken each day ...
-```{r, echo=TRUE}
+```{r mean2, echo=TRUE}
+
 mean2 <- mean(steps_by_day2$steps)
+
 mean2
 ```
 
 Recalculate the **median** of the total number of steps taken each day ...
-```{r, echo=TRUE}
+```{r median2, echo=TRUE}
+
 median2 <- median(steps_by_day2$steps)
+
 median2
 ```
 
@@ -167,10 +196,11 @@ median2
 
 
 
-### 5/ Are there differences in activity patterns between weekdays and weekends?
+### Step 5 - Are there differences in activity patterns between weekdays and weekends?
 
 Create factor variables **"weekday"** and **"weekday"** in the filled-in missing values dataset  ...
 ```{r, echo=TRUE}
+
 df3 <- transform(df2, 
                  day_type = ifelse(weekdays(as.Date(steps_by_day2$date)) == "Saturday" | 
                                    weekdays(as.Date(steps_by_day2$date)) == "Sunday", 
@@ -182,14 +212,15 @@ str(df3)
 
 Make a panel containing a time series plot (i.e. type = "l") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all weekday days or weekend days (y-axis) ...
 ```{r Plot4, echo=TRUE}
+
 avg_steps_by_interval_day_type <- aggregate(steps ~ interval + day_type, df3, mean)
 
 ggplot(avg_steps_by_interval_day_type, aes(x = interval, y = steps)) + 
       geom_line( col = "blue" ) + 
       facet_wrap(~ day_type, ncol = 1) +
-      ggtitle("Average number of steps each day by interval \n( Weekday vs. Weekend )") +
-      labs(x = "5-minutes interval") + 
-      labs(y = "Average number of steps taken")
+      ggtitle("Average number of steps each day by interval \n( Weekday vs. Weekend ) \n") +
+      labs(x = "\n 5-minutes interval") + 
+      labs(y = "Average number of steps taken \n")
 ```
   
   
